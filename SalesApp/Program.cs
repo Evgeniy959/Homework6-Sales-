@@ -1,5 +1,12 @@
-﻿using MySql.Data.MySqlClient;
+﻿/*Задание.
+Добавить в программу (https://github.com/itstep-shambala/Sales.git) возможность добавления данных о покупке после ввода 
+всей необходимой информации. Т.е.нужно от пользователя получить данные для всех полей таблицы tab_orders и написать 
+запрос на добавление в неё строки.*/
+
+using MySql.Data.MySqlClient;
 using System;
+using CLI;
+using SalesLib;
 
 namespace SalesApp
 {
@@ -7,59 +14,49 @@ namespace SalesApp
     {
         static void Main()
         {
-            const string CONN_STR = "Server = mysql60.hostland.ru; Database = host1323541_sbd07; Uid = host1323541_itstep; Pwd = 269f43dc;";
-            var data_base = new MySqlConnection(CONN_STR);
-            data_base.Open();
+            var db = new DataBase();
+            var products = db.GetProducts();
+            var buyers = db.GetBuyers();
+            Buyer buyer;
 
-            ShowInfo("Выберите продукт остатки котрого хотите посмотреть");
-            ShowInfo("1. Phone");
-            ShowInfo("2. Car");
-            var select = Console.ReadLine();
-            var sql = $"SELECT count FROM tab_products_stock JOIN tab_products ON tab_products_stock.product_id = tab_products.id WHERE product_id = {select}";
-            /*var command = new MySqlCommand();
-            command.CommandText = sql;
-            command.Connection = data_base;*/
-            var command = new MySqlCommand
+            foreach (var item in buyers)
             {
-                CommandText = sql,
-                Connection = data_base
-            };
-            var res = command.ExecuteReader();
-            if (res.HasRows)
+                Show.PrintLn($"{item.Id} - {item.Name}");
+            }
+            Show.PrintLn("Выберите номер покупателя");
+            var buyer_id = uint.Parse(Console.ReadLine());
+            if (buyer_id == 0)
             {
-                do
-                {
-                    res.Read();
-                    var count = res.GetInt32("count");
-                    ShowSuccess($"count = {count}");
-                } while (res.NextResult());
-
+                buyer = new Buyer();
             }
             else
             {
-                ShowError("Вернулась пустая таблица");
+                buyer = buyers[(int)(buyer_id - 1)];
             }
-            data_base.Close();
-            
-        }
-        static void ShowError(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[ERROR] {message}");
-            Console.ResetColor();
-        }
 
-        static void ShowSuccess(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[Success] {message}");
-            Console.ResetColor();
-        }
-        static void ShowInfo(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine($"[Info] {message}");
-            Console.ResetColor();
+            Show.PrintLn($"{buyer.Name} - {buyer.Discount}");
+
+            foreach (var product in products)
+            {
+                Show.PrintLn($"{product.Id}: {product.Name}, {product.Price}");
+            }
+
+            Show.Print("Введите номер продукта: ");
+            var product_id = uint.Parse(Console.ReadLine());
+            Show.Print("Введите количество: ");
+            var count_user = uint.Parse(Console.ReadLine());
+
+            var count_stock = db.GetProductCount(product_id);
+
+            if (count_user > count_stock)
+            {
+                Show.Error("Столько нет товара на складе");
+                return;
+            }
+
+            var price = products[(int)(product_id - 1)].Price;
+            var total_price = count_user * (price - price * buyer.Discount / 100);
+            Show.PrintLn($"Вам необходимо заплатить - {total_price}");
         }
     }
 }
