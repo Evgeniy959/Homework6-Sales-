@@ -95,7 +95,7 @@ namespace SalesLib
             return list;
         }
 
-        /*public List<Orders> GetOrders()
+        public List<Orders> GetOrders()
         {
             Open();
             var list = new List<Orders>();
@@ -110,8 +110,7 @@ namespace SalesLib
                 var id = res.GetUInt32("id");
                 var buyer_id = res.GetUInt32("buyer_id");
                 var seller_id = res.GetUInt32("seller_id");
-                //var date = res.GetString("date");
-                //var date = res.GetDateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                var date = res.GetString("date");
                 var product_id = res.GetUInt32("product_id");
                 var amount = res.GetUInt32("amount");
                 var total_price = res.GetUInt32("total_price");
@@ -120,12 +119,13 @@ namespace SalesLib
 
             Close();
             return list;
-        }*/
-        public void AddOrder(uint buyer_id, uint seller_id, string date, uint product_id, uint amount, uint total_price)
+        }
+        //public void AddOrder(uint buyer_id, uint seller_id, string date, uint product_id, uint amount, uint total_price)
+        public void AddOrder(Orders ord)
         {
             Open();
             var sql = $@"INSERT INTO tab_orders (buyer_id, seller_id, date, product_id, amount, total_price)
-                      VALUE ({buyer_id}, {seller_id}, {date}, {product_id}, {amount}, {total_price});";
+                      VALUE ({ord.BuyerId}, {ord.SellerId}, {ord.Date}, {ord.ProductId}, {ord.Amount}, {ord.TotalPrice});";
             command.CommandText = sql;
             command.ExecuteNonQuery();
             //var res = command.ExecuteReader();
