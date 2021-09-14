@@ -116,7 +116,6 @@ namespace SalesLib
                 var total_price = res.GetUInt32("total_price");
                 list.Add(new Orders { Id = id, BuyerId = buyer_id, SellerId = seller_id, Date = date, ProductId = product_id, Amount = amount, TotalPrice = total_price });
             }
-
             Close();
             return list;
         }
